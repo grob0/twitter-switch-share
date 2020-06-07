@@ -205,12 +205,15 @@ class FileManagement:
         return file_name
 
     def download_media(self, media_links, media_type):
+        if not os.path.exists('media/'):
+            os.mkdir('media/')
+            print("Directory media/ created")
         for i in range(0,len(media_links)):
             url = media_links[i]
             Type = media_type[i]
             file_name = self.get_file_name(url,Type)
             r = requests.get(url, allow_redirects=True)
-            file_path = 'media/'+ file_name
+            file_path = 'media/' + file_name
             open(file_path, 'wb').write(r.content)
 
 #################
