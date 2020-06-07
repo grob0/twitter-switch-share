@@ -75,7 +75,7 @@ This software is Open-Source under the GPL v3 license. More information [here](L
 ## Acknowledgments
 This project is my first Python project, so any suggestion on best practices or pull requests to improve the software is welcomed.
 
-Finally, thanks to [Javi Marina](https://github.com/javmarina) for the idea of uploading the media to Google Drive, since initially the script was done to only download locally.
+Finally, thanks to [Javi Marina](https://www.github.com/javmarina) for the idea of uploading the media to Google Drive, since initially the script was done to only download locally.
 
 ## TODO
 <sup>1</sup>: Create the folder automatically
