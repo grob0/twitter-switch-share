@@ -9,7 +9,7 @@ Nintendo Switch doesn't provide a method to easily share the screenshots you tak
 
 ## Getting Started
 ### Prerequisites
-- Python 3.x
+- Python 3.8
 - Activate your Twitter Dev account (link [here](https://developer.twitter.com/en/apply-for-access)) and create a Twitter App. Go to "Edit details" and then to "Keys and Tokens". Save the credentials to a JSON file and name it 'twitterAPI.json':
 ```
 {
@@ -76,3 +76,8 @@ This software is Open-Source under the GPL v3 license. More information [here](L
 This project is my first Python project, so any suggestion on best practices or pull requests to improve the software is welcomed.
 
 Finally, thanks to [Javi Marina](https://www.github.com/javmarina) for the idea of uploading the media to Google Drive, since initially the script was done to only download locally.
+
+## TODO 
+
+1. The script works fine on Windows. There are some compatibility issues on Linux.
+2. To make it more robust, it'll be better to look for tweets that were created with 'Nintendo Switch Share' instead of the hashtag
