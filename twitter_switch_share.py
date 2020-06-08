@@ -12,12 +12,12 @@ from googleapiclient.http import MediaIoBaseUpload
 #################
 # Configuration #
 ################# 
-HASHTAG = 'NintendoSwitch'  # Generic hashtag that Nintendo Switch always put in the tweets
-USERNAME = 'your-user-name'          # The account where you will share the media
-LOCAL_FLAG = False       # True if you want to save the images locally
-CLOUD_FLAG = True          # True if you want to upload the photos to Google Drive
-TWEETS = 15                  # Number of tweets written by the account, including the ones that doesn't have 
-                            # the desired hashtag
+HASHTAG = 'NintendoSwitch'      # Generic hashtag that Nintendo Switch always put in the tweets
+USERNAME = 'your-user-name'     # The account where you will share the media
+LOCAL_FLAG = False              # True if you want to save the images locally
+CLOUD_FLAG = True               # True if you want to upload the photos to Google Drive
+TWEETS = 15                     # Number of tweets written by the account, including the ones that doesn't have 
+                                # the desired hashtag
 
 # Drive configuration
 DRIVE_FOLDER_NAME = 'Switch Captures'
@@ -29,14 +29,14 @@ DRIVE_FOLDER_NAME = 'Switch Captures'
 
 
 class TwitterAPI:
-    def read_credentials(self):
+    def _read_credentials(self):
         with open('creds/twitterAPI.json') as json_file:
             creds = json.load(json_file)
         return creds
     
-    def get_api_auth(self):
+    def _get_api_auth(self):
         try:
-            creds = TwitterAPI().read_credentials()
+            creds = TwitterAPI()._read_credentials()
             consumer_key = creds['consumer_key']
             consumer_secret = creds['consumer_secret'] 
             access_token = creds['access_token']
@@ -51,7 +51,7 @@ class TwitterAPI:
 
     # Authentication into Twitter
     def get_twitter_client(self):
-        auth = self.get_api_auth()
+        auth = self._get_api_auth()
         client = tweepy.API(auth, wait_on_rate_limit=True)
         return client
 
@@ -68,7 +68,7 @@ class TwitterAPI:
         return tweets
 
     # Get the url and media type from the JSON
-    def get_media_info_from_tweet(self, tweet,urls, media_type):
+    def _get_media_info_from_tweet(self, tweet,urls, media_type):
         t = tweet[4]['media'][0]['type']
         if t == 'photo':
             u = tweet[4]['media'][0]['media_url_https']
@@ -89,7 +89,7 @@ class TwitterAPI:
                 for k in range(0, len(hashtag_list)):  # Search in the hashtag list the wanted hashtag
                     ht = hashtag_list[k]['text']
                     if ht == HASHTAG:
-                        [urls, media_type] = self.get_media_info_from_tweet(tweet,urls,media_type)                
+                        [urls, media_type] = self._get_media_info_from_tweet(tweet,urls,media_type)                
         return urls, media_type
 
 class DriveAPI:
@@ -104,13 +104,13 @@ class DriveAPI:
         creds = store.get()
         if not creds or creds.invalid:
             print('make new storage data file ')
-            flow = client.flow_from_clientsecrets('creds\client_secret.json', SCOPES)
+            flow = client.flow_from_clientsecrets('creds/client_secret.json', SCOPES)
             creds = tools.run_flow(flow, store, flags) \
                     if flags else tools.run_flow(flow, store)
         service = build('drive', 'v3', http=creds.authorize(Http()))
         return service
 
-    def search_folder(self,service):
+    def _search_folder(self,service):
         page_token = None
         while True:
             response = service.files().list(q="mimeType='application/vnd.google-apps.folder' and name='" + DRIVE_FOLDER_NAME + "'",
@@ -125,20 +125,21 @@ class DriveAPI:
             folder_id = folder_list[0].get('id')
             return folder_id
 
-    def create_folder(self, service):
+    def _create_folder(self, service):
         file_metadata = {
             'name': DRIVE_FOLDER_NAME,
             'mimeType': 'application/vnd.google-apps.folder'
         }
-        service.files().create(body=file_metadata, fields='id').execute()
+        folder = service.files().create(body=file_metadata, fields='id').execute()
+        folder_id = folder.get('id')
+        return folder_id
 
     def routine_folder(self, service):
         print('Searching "' + DRIVE_FOLDER_NAME + '" folder on Google Drive...')
-        folder_id = self.search_folder(service)
+        folder_id = self._search_folder(service)
         while not folder_id:
             print('Folder not found. Creating folder...')
-            self.create_folder(service)
-            folder_id = self.search_folder(service)
+            folder_id = self._create_folder(service)
         print('Folder created.')
         return folder_id
 
@@ -192,19 +193,19 @@ class DriveAPI:
     
 
 class FileManagement:
-    def get_filename_photo(self, url):
+    def _get_filename_photo(self, url):
         name = url[url.rfind('/')+1:len(url)]
         return name
 
-    def get_filename_video(self, url):
+    def _get_filename_video(self, url):
         name = url[url.rfind('/')+1:url.rfind('.')+4]
         return name
     
     def get_file_name(self, url, Type):
         if Type == 'photo':
-                file_name = self.get_filename_photo(url)
+                file_name = self._get_filename_photo(url)
         elif Type == 'video':
-                file_name = self.get_filename_video(url)
+                file_name = self._get_filename_video(url)
         return file_name
 
     def download_media(self, media_links, media_type):
@@ -227,37 +228,38 @@ if __name__ == '__main__':
     print('------Twitter-Switch-Share------\n\n\n')
     tweets = []
     media = []
-    if CLOUD_FLAG:
-        drive = DriveAPI().connect()
     # Get twitter access
-    client = TwitterAPI().get_twitter_client()
+    tw_client = TwitterAPI().get_twitter_client()
     print('Twitter Access granted!')
     # Retrieve tweets
     print('Retrieving tweets from: %s...' % USERNAME)
-    tweets = TwitterAPI().get_user_timeline(client)
+    tweets = TwitterAPI().get_user_timeline(tw_client)
     # Search for '#NintendoSwitch'
     print('Searching for #%s...' % HASHTAG)
     [media_links, media_types] = TwitterAPI().get_tweets_hashtag(tweets)
-    if LOCAL_FLAG:
-        print('Downloading media locally')
-        FileManagement().download_media(media_links, media_types)
-        print('Files downloaded! You will find them in /media')
-    if CLOUD_FLAG:
-        print('Accessing Google Drive API')
-        # drive = DriveAPI().connect() this line is commente because a strange error in the first execution.
-        print('Google Drive access granted!')
-        print('Looking for a folder called "' + DRIVE_FOLDER_NAME + '" on your Drive. In case you do not have it, it will be automatically created')
-        folder_id = DriveAPI().routine_folder(drive)
-        print('Uploading media...')
-        for i in range(0, len(media_links)):
-            url = media_links[i]
-            Type = media_types[i]
-            file_name = FileManagement().get_file_name(url,Type)
-            if DriveAPI().search_file(drive, file_name):
-               print('%s is already uploaded, trying with next file.' % file_name)
-               pass 
-            else:
-                print('Uploading %s...' % file_name)
-                f_io = DriveAPI().get_IOBase_content(url)
-                DriveAPI().upload_file(drive, file_name, f_io, folder_id)
-                print('%s uploaded' % file_name)
+    if len(media_links) > 0:
+        if LOCAL_FLAG:
+            print('Downloading media locally')
+            FileManagement().download_media(media_links, media_types)
+            print('Files downloaded! You will find them in /media')
+        if CLOUD_FLAG:
+            print('Accessing Google Drive API')
+            drive_client = DriveAPI().connect()
+            print('Google Drive access granted!')
+            print('Looking for a folder called "' + DRIVE_FOLDER_NAME + '" on your Drive. In case you do not have it, it will be automatically created')
+            folder_id = DriveAPI().routine_folder(drive_client)
+            print('Uploading media...')
+            for i in range(0, len(media_links)):
+                url = media_links[i]
+                Type = media_types[i]
+                file_name = FileManagement().get_file_name(url,Type)
+                if DriveAPI().search_file(drive_client, file_name):
+                    print('%s is already uploaded, trying with next file.' % file_name)
+                    pass 
+                else:
+                    print('Uploading %s...' % file_name)
+                    f_io = DriveAPI().get_IOBase_content(url)
+                    DriveAPI().upload_file(drive_client, file_name, f_io, folder_id)
+                    print('%s uploaded' % file_name)
+    else:
+        print('No media with #NintendoSwitch found')
