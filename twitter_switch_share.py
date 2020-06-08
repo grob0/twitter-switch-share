@@ -16,7 +16,7 @@ HASHTAG = 'NintendoSwitch'      # Generic hashtag that Nintendo Switch always pu
 USERNAME = 'your-user-name'     # The account where you will share the media
 LOCAL_FLAG = False              # True if you want to save the images locally
 CLOUD_FLAG = True               # True if you want to upload the photos to Google Drive
-TWEETS = 15                     # Number of tweets written by the account, including the ones that doesn't have 
+TWEETS = 20                     # Number of tweets written by the account, including the ones that doesn't have 
                                 # the desired hashtag
 
 # Drive configuration
@@ -60,7 +60,7 @@ class TwitterAPI:
         try: 
             # Pulling individual tweets from query
             for tweet in client.user_timeline(id=USERNAME, count= TWEETS, include_rts=False): # Adding to the list that contains all tweets
-                tweets.append((tweet.created_at,tweet.id,tweet.text, tweet.entities, tweet.extended_entities))  # This line throws an exception if a
+                tweets.append((tweet.created_at,tweet.id,tweet.text, tweet.entities, tweet.extended_entities, tweet.source))  # This line throws an exception if a
                                                                                                                 # tweet doesn't have media in it
         except BaseException as e:
             print('failed on_status,',str(e))
@@ -78,8 +78,7 @@ class TwitterAPI:
         media_type.append(t)
         return urls, media_type
 
-    
-    def get_tweets_hashtag(self, tweet_list):
+    def get_tweets_hashtag(self, tweet_list): # This is not used right now
         urls = []
         media_type = []
         for i in range(0, len(tweet_list)):
@@ -90,6 +89,16 @@ class TwitterAPI:
                     ht = hashtag_list[k]['text']
                     if ht == HASHTAG:
                         [urls, media_type] = self._get_media_info_from_tweet(tweet,urls,media_type)                
+        return urls, media_type
+
+    def get_tweets_nss(self, tweet_list):
+        urls = []
+        media_type = []
+        for i in range(0, len(tweet_list)):
+            tweet = tweet_list[i]
+            source = tweet[5]
+            if 'Nintendo Switch Share' in source: # If source is Nintendo Switch Share
+                [urls, media_type] = self._get_media_info_from_tweet(tweet,urls,media_type)                
         return urls, media_type
 
 class DriveAPI:
@@ -164,7 +173,9 @@ class DriveAPI:
         if f == 'jpg' or f == 'jpeg':
             file_type = 'photo'
         elif f == 'mp4':
-            file_type = 'video'
+            file_type = 'video_mp4'
+        else:
+            file_type = 'unsupported'
         return file_type
 
     def get_IOBase_content(self, url):
@@ -188,7 +199,11 @@ class DriveAPI:
             media = self._photo_file_upload(f_io)
         elif file_type == 'video':
             media = self._video_file_upload(f_io)
+        elif file_type == 'unsupported':
+            print('Not supported format')
+            return
         file = service.files().create(body=file_metadata, media_body=media).execute()
+        print('%s uploaded' % file_name)
         return file
     
 
@@ -236,7 +251,7 @@ if __name__ == '__main__':
     tweets = TwitterAPI().get_user_timeline(tw_client)
     # Search for '#NintendoSwitch'
     print('Searching for #%s...' % HASHTAG)
-    [media_links, media_types] = TwitterAPI().get_tweets_hashtag(tweets)
+    [media_links, media_types] = TwitterAPI().get_tweets_nss(tweets)
     if len(media_links) > 0:
         if LOCAL_FLAG:
             print('Downloading media locally')
@@ -260,6 +275,5 @@ if __name__ == '__main__':
                     print('Uploading %s...' % file_name)
                     f_io = DriveAPI().get_IOBase_content(url)
                     DriveAPI().upload_file(drive_client, file_name, f_io, folder_id)
-                    print('%s uploaded' % file_name)
     else:
         print('No media with #NintendoSwitch found')
