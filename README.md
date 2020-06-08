@@ -49,7 +49,7 @@ since they're usually pre-installed and common use, this guide supposes you alre
 $ pip install <package>
 ```
 ## Deployment
-Following the guide now you have the script and a folder named "creds" in the working directory. Create a folder named "media", that's where your local copies will be saved.<sup>1</sup> 
+Following the guide now you have the script and a folder named "creds" in the working directory. Your local copies will be saved in a 'media' folder, which will be automatically created by the script if not found.
 
 Open the script with a text editor and modify the constants with your preferences.
 
@@ -76,6 +76,3 @@ This software is Open-Source under the GPL v3 license. More information [here](L
 This project is my first Python project, so any suggestion on best practices or pull requests to improve the software is welcomed.
 
 Finally, thanks to [Javi Marina](https://www.github.com/javmarina) for the idea of uploading the media to Google Drive, since initially the script was done to only download locally.
-
-## TODO
-<sup>1</sup>: Create the folder automatically
