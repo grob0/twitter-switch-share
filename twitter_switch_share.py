@@ -19,6 +19,9 @@ CLOUD_FLAG = True          # True if you want to upload the photos to Google Dri
 TWEETS = 15                  # Number of tweets written by the account, including the ones that doesn't have 
                             # the desired hashtag
 
+# Drive configuration
+DRIVE_FOLDER_NAME = 'Switch Captures'
+
 
 ##################
 ##################
@@ -110,7 +113,7 @@ class DriveAPI:
     def search_folder(self,service):
         page_token = None
         while True:
-            response = service.files().list(q="mimeType='application/vnd.google-apps.folder' and name='Switch Captures'",
+            response = service.files().list(q="mimeType='application/vnd.google-apps.folder' and name='" + DRIVE_FOLDER_NAME + "'",
                                                 spaces='drive',
                                                 fields='nextPageToken, files(id, name)',
                                                 pageToken=page_token).execute()
@@ -124,13 +127,13 @@ class DriveAPI:
 
     def create_folder(self, service):
         file_metadata = {
-            'name': 'Switch Captures',
+            'name': DRIVE_FOLDER_NAME,
             'mimeType': 'application/vnd.google-apps.folder'
         }
         service.files().create(body=file_metadata, fields='id').execute()
 
     def routine_folder(self, service):
-        print('Searching "Switch Captures" folder on Google Drive...')
+        print('Searching "' + DRIVE_FOLDER_NAME + '" folder on Google Drive...')
         folder_id = self.search_folder(service)
         while not folder_id:
             print('Folder not found. Creating folder...')
@@ -243,7 +246,7 @@ if __name__ == '__main__':
         print('Accessing Google Drive API')
         # drive = DriveAPI().connect() this line is commente because a strange error in the first execution.
         print('Google Drive access granted!')
-        print('Looking for a folder called "Switch Captures" on your Drive. In case you do not have it, it will be automatically created')
+        print('Looking for a folder called "' + DRIVE_FOLDER_NAME + '" on your Drive. In case you do not have it, it will be automatically created')
         folder_id = DriveAPI().routine_folder(drive)
         print('Uploading media...')
         for i in range(0, len(media_links)):
