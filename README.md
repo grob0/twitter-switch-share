@@ -81,6 +81,6 @@ Finally, thanks to [Javi Marina](https://www.github.com/javmarina) for the idea 
 
 ## TODO 
 
-1. The script works fine on Windows. There are some compatibility issues on Linux.
+1. The script works fine on Windows. There are some compatibility issues on Linux. Be sure you don't execute Python 2.X.
 2. ~~To make it more robust, it'll be better to look for tweets that were created with 'Nintendo Switch Share' instead of the hashtag, because if you delete that text it won't recognize it.~~
 3. By default it takes a specific number of tweets of your account and this only translates in that number of media being uploaded only if you use an account specifically for sharing from the Nintendo Switch. I'll be looking for new methods to solve this.
