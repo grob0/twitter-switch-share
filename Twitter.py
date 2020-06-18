@@ -45,13 +45,15 @@ class TwitterAPI:
 
     # Get the url and media type from the JSON
     def _get_media_info_from_tweet(self, tweet,urls, media_type):
-        t = tweet[4]['media'][0]['type']
-        if t == 'photo':
-            u = tweet[4]['media'][0]['media_url_https']
-        else:
-            u = tweet[4]['media'][0]['video_info']['variants'][3]['url']
-        urls.append(u)
-        media_type.append(t)
+        media_list = tweet[4]['media']
+        for media in media_list:
+            t = media['type']
+            if t == 'photo':
+                u = media['media_url_https']
+            else:
+                u = media['video_info']['variants'][3]['url']
+            urls.append(u)
+            media_type.append(t)
         return urls, media_type
 
     def get_tweets_hashtag(self, tweet_list, hashtag): # This is not used right now
