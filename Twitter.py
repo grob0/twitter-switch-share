@@ -59,8 +59,7 @@ class TwitterAPI:
     def get_tweets_hashtag(self, tweet_list, hashtag): # This is not used right now
         urls = []
         media_type = []
-        for i in range(0, len(tweet_list)):
-            tweet = tweet_list[i]
+        for tweet in tweet_list:
             hashtag_list = tweet[3]['hashtags'] # Get the hashtag list
             if hashtag_list: # If hashtag list is not empty 
                 for k in range(0, len(hashtag_list)):  # Search in the hashtag list the wanted hashtag
@@ -72,8 +71,7 @@ class TwitterAPI:
     def get_tweets_nss(self, tweet_list):
         urls = []
         media_type = []
-        for i in range(0, len(tweet_list)):
-            tweet = tweet_list[i]
+        for tweet in tweet_list:
             source = tweet[5]
             if 'Nintendo Switch Share' in source: # If source is Nintendo Switch Share
                 [urls, media_type] = self._get_media_info_from_tweet(tweet,urls,media_type)                
