@@ -51,7 +51,13 @@ class TwitterAPI:
             if t == 'photo':
                 u = media['media_url_https']
             else:
-                u = media['video_info']['variants'][3]['url']
+                variants = media['video_info']['variants']
+                max_bitrate = -1
+                for variant in variants:
+                    bitrate = variant.get('bitrate')
+                    if bitrate and bitrate > max_bitrate:
+                        max_bitrate = bitrate
+                        u = variant['url']
             urls.append(u)
             media_type.append(t)
         return urls, media_type
