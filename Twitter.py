@@ -1,7 +1,17 @@
 import sys
 from tweepy import OAuthHandler, API
 from json import load
-from time import sleep 
+from time import sleep
+
+# Contains relevant info about a media tweet
+class MediaTweet:
+    def __init__(self, date, id, text, entities, extended_entities, source):
+        self.date = date
+        self.id = id
+        self.text = text
+        self.entities = entities
+        self.extended_entities = extended_entities
+        self.source = source
 
 class TwitterAPI:
     def _read_credentials(self):
@@ -33,19 +43,17 @@ class TwitterAPI:
     # Get a JSON with all the tweets' requested data
     def get_user_timeline(self, client, username, tweet_count):
         tweets = []
-        try: 
-            # Pulling individual tweets from query
-            for tweet in client.user_timeline(id=username, count= tweet_count, include_rts=False): # Adding to the list that contains all tweets
-                tweets.append((tweet.created_at,tweet.id,tweet.text, tweet.entities, tweet.extended_entities, tweet.source))  # This line throws an exception if a
-                                                                                                                # tweet doesn't have media in it
-        except BaseException as e:
-            print('failed on_status,',str(e))
-            sleep(3)
+
+        # Pulling individual tweets from query
+        for tweet in client.user_timeline(id=username, count= tweet_count, include_rts=False): # Adding to the list that contains all tweets
+            if hasattr(tweet, 'extended_entities'):
+                tweets.append(MediaTweet(tweet.created_at, tweet.id, tweet.text, tweet.entities, tweet.extended_entities, tweet.source))
+
         return tweets
 
     # Get the url and media type from the JSON
-    def _get_media_info_from_tweet(self, tweet,urls, media_type):
-        media_list = tweet[4]['media']
+    def _get_media_info_from_tweet(self, tweet, urls, media_type):
+        media_list = tweet.extended_entities['media']
         for media in media_list:
             t = media['type']
             if t == 'photo':
@@ -66,7 +74,7 @@ class TwitterAPI:
         urls = []
         media_type = []
         for tweet in tweet_list:
-            hashtag_list = tweet[3]['hashtags'] # Get the hashtag list
+            hashtag_list = tweet.entities['hashtags'] # Get the hashtag list
             if hashtag_list: # If hashtag list is not empty 
                 for k in range(0, len(hashtag_list)):  # Search in the hashtag list the wanted hashtag
                     ht = hashtag_list[k]['text']
@@ -78,7 +86,7 @@ class TwitterAPI:
         urls = []
         media_type = []
         for tweet in tweet_list:
-            source = tweet[5]
+            source = tweet.source
             if 'Nintendo Switch Share' in source: # If source is Nintendo Switch Share
                 [urls, media_type] = self._get_media_info_from_tweet(tweet,urls,media_type)                
         return urls, media_type
