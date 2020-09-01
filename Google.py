@@ -173,20 +173,20 @@ class PhotosAPI:
 
     def get_album_filenames(self, service, album_id):
         page_token = None
-        media_items = []
         filenames = []
         while True:
             response = service.mediaItems().search(
                 fields = 'nextPageToken,mediaItems(filename)',
                 body = {"pageSize": 100, "albumId": album_id, "pageToken": page_token}).execute()
 
-            media_items.extend(response.get('mediaItems', []))
+            media_items = response.get('mediaItems', [])
+            for media_item in media_items:
+                filenames.append(media_item.get('filename'))
+
             page_token = response.get('nextPageToken')
             if page_token is None:
                 break
 
-        for media_item in media_items:
-            filenames.append(media_item.get('filename'))
         return filenames
 
     def get_IOBase_content(self, url):
