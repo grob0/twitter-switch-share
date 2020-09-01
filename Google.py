@@ -137,21 +137,20 @@ class PhotosAPI:
 
     def _search_album(self, service, album_title):
         page_token = None
-        album_list = [];
         while True:
             response = service.albums().list(pageSize=50,
                                                 fields='nextPageToken,albums(id,title)',
                                                 pageToken=page_token).execute()
 
-            album_list.extend(response.get('albums', []))
+            albums = response.get('albums', [])
+            if albums:
+                for album in albums:
+                    if album.get('title') == album_title:
+                        return album.get('id')
+
             page_token = response.get('nextPageToken')
             if page_token is None:
                 break
-
-        if album_list:
-            for album in album_list:
-                if album.get('title') == album_title:
-                    return album.get('id')
 
     def _create_album(self, service, album_title):
         album_body = {
