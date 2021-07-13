@@ -19,7 +19,7 @@ This script allows you to automatically download these screeshots or videos loca
     "access_secret"     : "value-of-access-token-secret" 
 }
 ```
-- Create a project in the Google APIs Console and the credentials for it (when creating the credentials, select 'Desktop application', more info [here](https://support.google.com/googleapi/answer/6158849?hl=en&ref_topic=7013279)). When it's done, download the credentials (there's a botton on the right for that) and rename them as "client_secret.json"
+- Create a project in the Google APIs Console and the credentials for it (when creating the credentials, select 'Desktop application', more info [here](https://support.google.com/googleapi/answer/6158849?hl=en&ref_topic=7013279)). When it's done, download the credentials (there's a button on the right for that) and rename them as "client_secret.json"
 
 Once you have the APIs access, create a folder in the working directory called "creds" and move both files there.
 
