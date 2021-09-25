@@ -12,9 +12,9 @@ class Local:
     
     def get_file_name(self, url, Type):
         if Type == 'photo':
-                file_name = self._get_filename_photo(url)
+            file_name = self._get_filename_photo(url)
         elif Type == 'video':
-                file_name = self._get_filename_video(url)
+            file_name = self._get_filename_video(url)
         return file_name
 
     def download_media(self, media_links, media_type):
